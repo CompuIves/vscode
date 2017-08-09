@@ -167,7 +167,7 @@ export class SimpleEditorService implements IEditorService {
 	private findModel(editor: editorCommon.ICommonCodeEditor, data: IResourceInput): editorCommon.IModel {
 		let model = editor.getModel();
 		if (model.uri.toString() !== data.resource.toString()) {
-			return null;
+			return <editorCommon.IModel>monaco.editor.getModel(data.resource);
 		}
 
 		return model;

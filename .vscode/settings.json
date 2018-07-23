@@ -31,9 +31,11 @@
 	"lcov.watch": [
 		{
 			"pattern": "**/*.test.js",
-			"command": "${workspaceFolder}/scripts/test.sh --coverage --run ${file}",
+			"command":
+				"${workspaceFolder}/scripts/test.sh --coverage --run ${file}",
 			"windows": {
-				"command": "${workspaceFolder}\\scripts\\test.bat --coverage --run ${file}"
+				"command":
+					"${workspaceFolder}\\scripts\\test.bat --coverage --run ${file}"
 			}
 		}
 	],
@@ -41,6 +43,6 @@
 	"npm.exclude": "**/extensions/**",
 	"emmet.excludeLanguages": [],
 	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.preferences.quoteStyle": "single"
-
+	"typescript.preferences.quoteStyle": "single",
+	"editor.formatOnSave": false
 }

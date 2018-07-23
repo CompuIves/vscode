@@ -44,6 +44,13 @@ export class StandaloneCodeEditorServiceImpl extends CodeEditorServiceImpl {
 			return null;
 		}
 
+		if (
+			(<any>window).monacoCodeSandbox &&
+			(<any>window).monacoCodeSandbox.openModel
+		) {
+			(<any>window).monacoCodeSandbox.openModel(model);
+		}
+
 		const selection = <IRange>input.options.selection;
 		if (selection) {
 			if (typeof selection.endLineNumber === 'number' && typeof selection.endColumn === 'number') {
@@ -63,11 +70,6 @@ export class StandaloneCodeEditorServiceImpl extends CodeEditorServiceImpl {
 	}
 
 	private findModel(editor: ICodeEditor, resource: URI): ITextModel {
-		const model = editor.getModel();
-		if (model.uri.toString() !== resource.toString()) {
-			return null;
-		}
-
-		return model;
+		return (<any>window).monaco.editor.getModel(resource);
 	}
 }

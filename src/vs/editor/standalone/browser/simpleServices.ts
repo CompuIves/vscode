@@ -118,14 +118,9 @@ export class SimpleEditorModelResolverService implements ITextModelService {
 	}
 
 	private findModel(editor: ICodeEditor, resource: URI): ITextModel {
-		let model = editor.getModel();
-		if (model.uri.toString() !== resource.toString()) {
-			return null;
+		return (<any>window).monaco.editor.getModel(resource);
 		}
-
-		return model;
 	}
-}
 
 export class SimpleProgressService implements IProgressService {
 	_serviceBrand: any;

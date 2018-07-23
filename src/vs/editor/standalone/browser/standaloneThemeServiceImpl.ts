@@ -100,7 +100,7 @@ class StandaloneTheme implements IStandaloneTheme {
 	}
 
 	public defines(colorId: ColorIdentifier): boolean {
-    return Object.prototype.hasOwnProperty.call(this.getColors(), colorId);
+		return Object.prototype.hasOwnProperty.call(this.getColors(), colorId);
 	}
 
 	public get type() {

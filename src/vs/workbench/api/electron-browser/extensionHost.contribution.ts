@@ -19,7 +19,7 @@ import { LanguageConfigurationFileHandler } from 'vs/workbench/parts/codeEditor/
 import 'vs/workbench/api/node/apiCommands';
 import './mainThreadCommands';
 import './mainThreadConfiguration';
-import './mainThreadDebugService';
+// import './mainThreadDebugService';
 import './mainThreadDecorations';
 import './mainThreadDiagnostics';
 import './mainThreadDialogs';
@@ -39,21 +39,21 @@ import './mainThreadMessageService';
 import './mainThreadOutputService';
 import './mainThreadProgress';
 import './mainThreadQuickOpen';
-import './mainThreadSCM';
-import './mainThreadSearch';
+// import './mainThreadSCM';
+// import './mainThreadSearch';
 import './mainThreadSaveParticipant';
-import './mainThreadStatusBar';
+// import './mainThreadStatusBar';
 import './mainThreadStorage';
-import './mainThreadTask';
+// import './mainThreadTask';
 import './mainThreadTelemetry';
-import './mainThreadTerminalService';
-import './mainThreadTreeViews';
-import './mainThreadLogService';
-import './mainThreadWebview';
-import './mainThreadComments';
-import './mainThreadUrls';
+// import './mainThreadTerminalService';
+// import './mainThreadTreeViews';
+// import './mainThreadLogService';
+// import './mainThreadWebview';
+// import './mainThreadComments';
+// import './mainThreadUrls';
 import './mainThreadWindow';
-import './mainThreadWorkspace';
+// import './mainThreadWorkspace';
 
 export class ExtensionPoints implements IWorkbenchContribution {
 

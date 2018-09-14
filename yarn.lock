@@ -35,6 +35,10 @@
   version "4.2.22"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-4.2.22.tgz#cf488a0f6b4a9c245d09927f4f757ca278b9c8ce"
 
+"@types/node@^10.5.4":
+  version "10.5.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.4.tgz#6eccc158504357d1da91434d75e86acde94bb10b"
+
 "@types/semver@^5.4.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"

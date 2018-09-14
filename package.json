@@ -59,6 +59,7 @@
     "@types/keytar": "4.0.1",
     "@types/minimist": "1.2.0",
     "@types/mocha": "2.2.39",
+    "@types/node": "^10.5.4",
     "@types/sinon": "1.16.34",
     "asar": "^0.14.0",
     "azure-storage": "^0.3.1",

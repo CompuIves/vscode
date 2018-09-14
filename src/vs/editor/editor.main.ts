@@ -5,6 +5,8 @@
 
 'use strict';
 
+import 'vs/codesandbox/codesandbox.all';
+
 import 'vs/editor/editor.all';
 import 'vs/editor/standalone/browser/accessibilityHelp/accessibilityHelp';
 import 'vs/editor/standalone/browser/inspectTokens/inspectTokens';

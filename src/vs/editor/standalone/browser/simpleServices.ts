@@ -5,9 +5,11 @@
 'use strict';
 
 import Severity from 'vs/base/common/severity';
+import { Registry } from 'vs/platform/registry/common/platform';
+import { IConfigurationRegistry, Extensions } from 'vs/platform/configuration/common/configurationRegistry';
 import URI from 'vs/base/common/uri';
 import { TPromise } from 'vs/base/common/winjs.base';
-import { IConfigurationService, IConfigurationChangeEvent, IConfigurationOverrides, IConfigurationData } from 'vs/platform/configuration/common/configuration';
+import { IConfigurationService, IConfigurationChangeEvent, IConfigurationOverrides, IConfigurationData, ConfigurationTarget } from 'vs/platform/configuration/common/configuration';
 import { IWorkspaceIdentifier, ISingleFolderWorkspaceIdentifier } from 'vs/platform/workspaces/common/workspaces';
 import { ICommandService, ICommand, ICommandEvent, ICommandHandler, CommandsRegistry } from 'vs/platform/commands/common/commands';
 import { AbstractKeybindingService } from 'vs/platform/keybinding/common/abstractKeybindingService';
@@ -15,16 +17,16 @@ import { USLayoutResolvedKeybinding } from 'vs/platform/keybinding/common/usLayo
 import { KeybindingResolver } from 'vs/platform/keybinding/common/keybindingResolver';
 import { IKeybindingEvent, KeybindingSource, IKeyboardEvent } from 'vs/platform/keybinding/common/keybinding';
 import { ContextKeyExpr, IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
-import { IWorkspaceContextService, IWorkspace, WorkbenchState, IWorkspaceFolder, IWorkspaceFoldersChangeEvent, WorkspaceFolder } from 'vs/platform/workspace/common/workspace';
+import { IWorkspaceContextService, IWorkspace, WorkbenchState, IWorkspaceFolder, IWorkspaceFoldersChangeEvent, WorkspaceFolder, Workspace } from 'vs/platform/workspace/common/workspace';
 import * as editorCommon from 'vs/editor/common/editorCommon';
 import { ICodeEditor, IDiffEditor, isCodeEditor } from 'vs/editor/browser/editorBrowser';
 import { Event, Emitter } from 'vs/base/common/event';
-import { Configuration, DefaultConfigurationModel, ConfigurationModel } from 'vs/platform/configuration/common/configurationModels';
+import { Configuration, DefaultConfigurationModel, ConfigurationModel, ConfigurationChangeEvent } from 'vs/platform/configuration/common/configurationModels';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 import { IProgressService, IProgressRunner } from 'vs/platform/progress/common/progress';
 import { ITextResourceConfigurationService } from 'vs/editor/common/services/resourceConfiguration';
 import { ITextModelService, ITextModelContentProvider, ITextEditorModel } from 'vs/editor/common/services/resolverService';
-import { IDisposable, IReference, ImmortalReference, combinedDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { IDisposable, IReference, ImmortalReference, combinedDisposable, toDisposable, Disposable } from 'vs/base/common/lifecycle';
 import * as dom from 'vs/base/browser/dom';
 import { StandardKeyboardEvent } from 'vs/base/browser/keyboardEvent';
 import { KeybindingsRegistry, IKeybindingItem } from 'vs/platform/keybinding/common/keybindingsRegistry';
@@ -45,6 +47,8 @@ import { WorkspaceEdit, isResourceTextEdit, TextEdit } from 'vs/editor/common/mo
 import { IModelService } from 'vs/editor/common/services/modelService';
 import { EditOperation } from 'vs/editor/common/core/editOperation';
 import { localize } from 'vs/nls';
+import { WorkspaceConfigurationChangeEvent } from 'vs/workbench/services/configuration/common/configurationModels';
+import { equals } from 'vs/base/common/objects';
 
 export class SimpleModel implements ITextEditorModel {
 
@@ -373,7 +377,7 @@ function isConfigurationOverrides(thing: any): thing is IConfigurationOverrides 
 		&& (!thing.resource || thing.resource instanceof URI);
 }
 
-export class SimpleConfigurationService implements IConfigurationService {
+export class SimpleConfigurationService extends Disposable implements IConfigurationService {
 
 	_serviceBrand: any;
 
@@ -383,7 +387,10 @@ export class SimpleConfigurationService implements IConfigurationService {
 	private _configuration: Configuration;
 
 	constructor() {
+		super();
+
 		this._configuration = new Configuration(new DefaultConfigurationModel(), new ConfigurationModel());
+		this._register(Registry.as<IConfigurationRegistry>(Extensions.Configuration).onDidRegisterConfiguration(configurationProperties => this.onDidRegisterConfiguration(configurationProperties)));
 	}
 
 	private configuration(): Configuration {
@@ -400,8 +407,17 @@ export class SimpleConfigurationService implements IConfigurationService {
 		return this.configuration().getValue(section, overrides, null);
 	}
 
-	public updateValue(key: string, value: any, arg3?: any, arg4?: any): TPromise<void> {
+	updateValue(key: string, value: any): TPromise<void>;
+	updateValue(key: string, value: any, overrides: IConfigurationOverrides): TPromise<void>;
+	updateValue(key: string, value: any, target: ConfigurationTarget): TPromise<void>;
+	updateValue(key: string, value: any, overrides: IConfigurationOverrides, target: ConfigurationTarget): TPromise<void>;
+	updateValue(key: string, value: any, overrides: IConfigurationOverrides, target: ConfigurationTarget, donotNotifyError: boolean): TPromise<void>;
+	updateValue(key: string, value: any, arg3?: any, arg4?: any, donotNotifyError?: any): TPromise<void> {
+		const overrides = isConfigurationOverrides(arg3) ? arg3 : void 0;
+		const target = this.deriveConfigurationTarget(key, value, overrides, overrides ? arg4 : arg3);
+
 		this.configuration().updateValue(key, value);
+		this.triggerConfigurationChange(new ConfigurationChangeEvent().change([key]), target);
 		return TPromise.as(null);
 	}
 
@@ -424,7 +440,68 @@ export class SimpleConfigurationService implements IConfigurationService {
 	}
 
 	public getConfigurationData(): IConfigurationData {
-		return null;
+		return this.configuration().toData();
+	}
+
+	private onDidRegisterConfiguration(keys: string[]): void {
+		this.reset(); // reset our caches
+		this.trigger(keys, ConfigurationTarget.DEFAULT);
+	}
+
+	private trigger(keys: string[], source: ConfigurationTarget): void {
+		this._onDidChangeConfiguration.fire(new ConfigurationChangeEvent().change(keys).telemetryData(source, this.getTargetConfiguration(source)));
+	}
+
+	private reset(): void {
+		const defaults = new DefaultConfigurationModel();
+		this._configuration = new Configuration(defaults, new ConfigurationModel());
+	}
+
+	private getTargetConfiguration(target: ConfigurationTarget): any {
+		switch (target) {
+			case ConfigurationTarget.DEFAULT:
+				return this._configuration.defaults.contents;
+			case ConfigurationTarget.USER:
+				return this._configuration.user.contents;
+		}
+		return {};
+	}
+
+	// TODO fix this
+	private workspace = new Workspace('');
+
+	private deriveConfigurationTarget(key: string, value: any, overrides: IConfigurationOverrides, target: ConfigurationTarget): ConfigurationTarget {
+		if (target) {
+			return target;
+		}
+
+		if (value === void 0) {
+			// Ignore. But expected is to remove the value from all targets
+			return void 0;
+		}
+
+		const inspect = this.inspect(key, overrides);
+		if (equals(value, inspect.value)) {
+			// No change. So ignore.
+			return void 0;
+		}
+
+		if (inspect.workspaceFolder !== void 0) {
+			return ConfigurationTarget.WORKSPACE_FOLDER;
+		}
+
+		if (inspect.workspace !== void 0) {
+			return ConfigurationTarget.WORKSPACE;
+		}
+
+		return ConfigurationTarget.USER;
+	}
+
+	private triggerConfigurationChange(configurationEvent: ConfigurationChangeEvent, target: ConfigurationTarget): void {
+		if (configurationEvent.affectedKeys.length) {
+			configurationEvent.telemetryData(target, this.getTargetConfiguration(target));
+			this._onDidChangeConfiguration.fire(new WorkspaceConfigurationChangeEvent(configurationEvent, this.workspace));
+		}
 	}
 }
 
@@ -436,6 +513,7 @@ export class SimpleResourceConfigurationService implements ITextResourceConfigur
 	private readonly _onDidChangeConfigurationEmitter = new Emitter();
 
 	constructor(private configurationService: SimpleConfigurationService) {
+		this.onDidChangeConfiguration = this.configurationService.onDidChangeConfiguration;
 		this.configurationService.onDidChangeConfiguration((e) => {
 			this._onDidChangeConfigurationEmitter.fire(e);
 		});

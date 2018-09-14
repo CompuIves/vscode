@@ -84,6 +84,8 @@ export class ContextMenuHandler {
 
 					menu.focus();
 
+					console.log(menu);
+
 					return combinedDisposable([...menuDisposables, menu]);
 				},
 

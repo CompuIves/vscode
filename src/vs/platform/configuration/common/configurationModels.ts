@@ -98,7 +98,9 @@ export class ConfigurationModel implements IConfigurationModel {
 	}
 
 	freeze(): ConfigurationModel {
-		this.isFrozen = true;
+		// TODO: check why this is needed and if it's related to the inmemory config, solution would probably be
+		// to implement a configurationWriteService.
+		// this.isFrozen = true;
 		return this;
 	}
 

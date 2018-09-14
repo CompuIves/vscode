@@ -279,6 +279,8 @@ export class ExtensionService extends Disposable implements IExtensionService {
 		this._extensionHostProcessActivationTimes = Object.create(null);
 		this._extensionHostExtensionRuntimeErrors = Object.create(null);
 
+		console.log(this);
+
 		this.startDelayed(lifecycleService);
 
 		if (this._extensionEnablementService.allUserExtensionsDisabled) {
@@ -490,6 +492,7 @@ export class ExtensionService extends Disposable implements IExtensionService {
 		this._scanExtensions()
 			.then(allExtensions => this._getRuntimeExtensions(allExtensions))
 			.then(allExtensions => {
+				console.log(allExtensions);
 				this._registry = new ExtensionDescriptionRegistry(allExtensions);
 
 				let availableExtensions = this._registry.getAllExtensionDescriptions();

@@ -50,6 +50,8 @@ export interface ITreeShakingOptions {
 	importIgnorePattern: RegExp;
 
 	redirects: { [module: string]: string; };
+
+	ignores: string[]
 }
 
 export interface ITreeShakingResult {
@@ -110,6 +112,10 @@ function discoverAndReadFiles(options: ITreeShakingOptions): IFileMap {
 		if (fs.existsSync(dts_filename)) {
 			const dts_filecontents = fs.readFileSync(dts_filename).toString();
 			FILES[moduleId + '.d.ts'] = dts_filecontents;
+			continue;
+		}
+
+		if (options.ignores && options.ignores.indexOf(moduleId) > -1) {
 			continue;
 		}
 

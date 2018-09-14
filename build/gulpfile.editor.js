@@ -86,10 +86,11 @@ gulp.task('extract-editor-src', ['clean-editor-src'], function () {
 		redirects: {
 			'vs/base/browser/ui/octiconLabel/octiconLabel': 'vs/base/browser/ui/octiconLabel/octiconLabel.mock',
 		},
+		ignores: ['path', 'vscode-xterm'],
 		compilerOptions: {
 			module: 2, // ModuleKind.AMD
 		},
-		shakeLevel: 2, // 0-Files, 1-InnerFile, 2-ClassMembers
+		shakeLevel: 0, // 0-Files, 1-InnerFile, 2-ClassMembers
 		importIgnorePattern: /^vs\/css!/,
 		destRoot: path.join(root, 'out-editor-src')
 	});
@@ -133,7 +134,11 @@ gulp.task('extract-editor-esm', ['clean-editor-esm', 'clean-editor-distro'], fun
 		redirects: {
 			'vs/base/browser/ui/octiconLabel/octiconLabel': 'vs/base/browser/ui/octiconLabel/octiconLabel.mock',
 			'vs/nls': 'vs/nls.mock',
-		}
+		},
+		ignores: [
+			'path',
+			'vscode-xterm'
+		]
 	});
 });
 gulp.task('compile-editor-esm', ['extract-editor-esm', 'clean-editor-distro'], function () {

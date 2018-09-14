@@ -91,6 +91,10 @@ function extractEditor(options) {
         'typings/thenable.d.ts',
         'typings/es6-promise.d.ts',
         'typings/require.d.ts',
+        'typings/node.d.ts',
+        'typings/vscode-xterm.d.ts',
+        'typings/lib.array-ext.d.ts',
+        'typings/electron.d.ts',
     ].forEach(copyFile);
 }
 exports.extractEditor = extractEditor;
@@ -187,6 +191,9 @@ function createESMSourcesAndResources(options) {
         if (transportDTS(options, module_1, enqueue, write)) {
             continue;
         }
+        if (options.ignores && options.ignores.indexOf(module_1) > -1) {
+            continue;
+        }
         var filename = void 0;
         if (options.redirects[module_1]) {
             filename = path.join(SRC_DIR, options.redirects[module_1] + '.ts');
@@ -201,6 +208,9 @@ function createESMSourcesAndResources(options) {
             var pos = info.importedFiles[i].pos;
             var end = info.importedFiles[i].end;
             var importedFilepath = void 0;
+            if (options.ignores && options.ignores.indexOf(importedFilename) > -1) {
+                continue;
+            }
             if (/^vs\/css!/.test(importedFilename)) {
                 importedFilepath = importedFilename.substr('vs/css!'.length) + '.css';
             }
@@ -247,7 +257,10 @@ function createESMSourcesAndResources(options) {
                 "es2015.collection",
                 "es2015.promise"
             ],
-            "types": []
+            "types": [],
+            "typeRoots": [
+                "../src/typings"
+            ]
         }
     };
     fs.writeFileSync(path.join(path.dirname(OUT_FOLDER), 'tsconfig.json'), JSON.stringify(esm_opts, null, '\t'));

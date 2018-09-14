@@ -538,7 +538,7 @@ export function execute(): IMonacoDeclarationResult {
 		OUTPUT_FILES[SRC_FILE_TO_EXPECTED_NAME[fileName]] = emitOutput.outputFiles[0].text;
 		// console.log(`Generating .d.ts for ${fileName} took ${Date.now() - t} ms`);
 	});
-	console.log(`Generating .d.ts took ${Date.now() - t1} ms`);
+	log(`Generating .d.ts took ${Date.now() - t1} ms`);
 
 	// console.log(result.filePath);
 	// fs.writeFileSync(result.filePath, result.content.replace(/\r\n/gm, '\n'));

@@ -98,6 +98,10 @@ export function extractEditor(options: tss.ITreeShakingOptions & { destRoot: str
 		'typings/thenable.d.ts',
 		'typings/es6-promise.d.ts',
 		'typings/require.d.ts',
+		'typings/node.d.ts',
+		'typings/vscode-xterm.d.ts',
+		'typings/lib.array-ext.d.ts',
+		'typings/electron.d.ts', // TODO(ives): REMOVE THIS
 	].forEach(copyFile);
 }
 
@@ -106,6 +110,7 @@ export interface IOptions {
 	outFolder: string;
 	outResourcesFolder: string;
 	redirects: { [module: string]: string; };
+	ignores: string[] | undefined;
 }
 
 export function createESMSourcesAndResources(options: IOptions): void {
@@ -211,6 +216,10 @@ export function createESMSourcesAndResources(options: IOptions): void {
 			continue;
 		}
 
+		if (options.ignores && options.ignores.indexOf(module) > -1) {
+			continue;
+		}
+
 		let filename: string;
 		if (options.redirects[module]) {
 			filename = path.join(SRC_DIR, options.redirects[module] + '.ts');
@@ -227,6 +236,9 @@ export function createESMSourcesAndResources(options: IOptions): void {
 			const end = info.importedFiles[i].end;
 
 			let importedFilepath: string;
+			if (options.ignores && options.ignores.indexOf(importedFilename) > -1) {
+				continue;
+			}
 			if (/^vs\/css!/.test(importedFilename)) {
 				importedFilepath = importedFilename.substr('vs/css!'.length) + '.css';
 			} else {
@@ -278,6 +290,9 @@ export function createESMSourcesAndResources(options: IOptions): void {
 				"es2015.promise"
 			],
 			"types": [
+			],
+			"typeRoots": [
+				"../src/typings"
 			]
 		}
 	};

@@ -60,6 +60,9 @@ function discoverAndReadFiles(options) {
             FILES[moduleId + '.d.ts'] = dts_filecontents;
             continue;
         }
+        if (options.ignores && options.ignores.indexOf(moduleId) > -1) {
+            continue;
+        }
         var ts_filename = void 0;
         if (options.redirects[moduleId]) {
             ts_filename = path.join(options.sourcesRoot, options.redirects[moduleId] + '.ts');

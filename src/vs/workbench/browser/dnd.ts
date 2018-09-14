@@ -110,6 +110,7 @@ export function extractResources(e: DragEvent, externalOnly?: boolean): (IDragge
 		// Check for native file transfer
 		if (e.dataTransfer && e.dataTransfer.files) {
 			for (let i = 0; i < e.dataTransfer.files.length; i++) {
+				// @ts-ignore
 				const file = e.dataTransfer.files[i] as { path: string };
 				if (file && file.path && !resources.some(r => r.resource.fsPath === file.path) /* prevent duplicates */) {
 					try {
@@ -494,6 +495,10 @@ export class DragAndDropObserver extends Disposable {
 		}));
 
 		this._register(addDisposableListener(this.element, EventType.DRAG_OVER, (e: DragEvent) => {
+			// Do this to fix chrome behaviour
+			e.preventDefault();
+			e.stopPropagation();
+
 			if (this.callbacks.onDragOver) {
 				this.callbacks.onDragOver(e);
 			}

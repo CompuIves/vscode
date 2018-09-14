@@ -23,8 +23,9 @@ export class MainThreadWindow implements MainThreadWindowShape {
 	) {
 		this.proxy = extHostContext.getProxy(ExtHostContext.ExtHostWindow);
 
-		latch(windowService.onDidChangeFocus)
-			(this.proxy.$onDidChangeWindowFocus, this.proxy, this.disposables);
+		// TODO:UNDO
+		// latch(windowService.onDidChangeFocus)
+		// 	(this.proxy.$onDidChangeWindowFocus, this.proxy, this.disposables);
 	}
 
 	$getWindowVisibility(): TPromise<boolean> {

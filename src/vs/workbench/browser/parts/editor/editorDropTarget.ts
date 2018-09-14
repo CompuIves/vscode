@@ -124,11 +124,14 @@ class DropOverlay extends Themable {
 			onDragEnd: e => this.dispose(),
 
 			onDrop: e => {
+				console.log('a', this.currentDropOperation);
 				EventHelper.stop(e, true);
 
 				// Dispose overlay
 				this.dispose();
 
+				console.log(this.currentDropOperation);
+				console.log(this.handleDrop);
 				// Handle drop if we have a valid operation
 				if (this.currentDropOperation) {
 					this.handleDrop(e, this.currentDropOperation.splitDirection);

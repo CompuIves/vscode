@@ -146,6 +146,7 @@ export class RPCProtocol implements IRPCProtocol {
 	}
 
 	public set<T, R extends T>(identifier: ProxyIdentifier<T>, value: R): R {
+		console.log('setting', identifier, value);
 		this._locals[identifier.id] = value;
 		return value;
 	}

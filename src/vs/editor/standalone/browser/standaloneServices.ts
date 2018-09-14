@@ -44,6 +44,38 @@ import { INotificationService } from 'vs/platform/notification/common/notificati
 import { IDialogService } from 'vs/platform/dialogs/common/dialogs';
 import { IListService, ListService } from 'vs/platform/list/browser/listService';
 import { IBulkEditService } from 'vs/editor/browser/services/bulkEditService';
+import { IQuickOpenService } from 'vs/platform/quickOpen/common/quickOpen';
+import { IEditorGroupsService } from 'vs/workbench/services/group/common/editorGroupsService';
+import { IPartService } from 'vs/workbench/services/part/common/partService';
+import { IHistoryService } from 'vs/workbench/services/history/common/history';
+import { IFileService } from 'vs/platform/files/common/files';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
+import { IWindowsService, IWindowService } from 'vs/platform/windows/common/windows';
+import { ITextFileService } from 'vs/workbench/services/textfile/common/textfiles';
+import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
+import { IUntitledEditorService } from 'vs/workbench/services/untitled/common/untitledEditorService';
+import { IHashService } from 'vs/workbench/services/hash/common/hashService';
+import { IBackupFileService } from 'vs/workbench/services/backup/common/backup';
+import { IDecorationsService } from 'vs/workbench/services/decorations/browser/decorations';
+import { IPreferencesService } from 'vs/workbench/services/preferences/common/preferences';
+import { IJSONEditingService } from 'vs/workbench/services/configuration/common/jsonEditing';
+import { ITextModelService } from 'vs/editor/common/services/resolverService';
+import { IWorkspacesService } from 'vs/platform/workspaces/common/workspaces';
+import { ISearchService } from 'vs/platform/search/common/search';
+import { IViewletService } from 'vs/workbench/services/viewlet/browser/viewlet';
+import { ICodeSandboxService } from 'vs/codesandbox/services/codesandbox/common/codesandbox';
+import { IRequestService } from 'vs/platform/request/node/request';
+import { IExtensionGalleryService, IExtensionManagementService, IExtensionEnablementService } from 'vs/platform/extensionManagement/common/extensionManagement';
+import { IBroadcastService } from 'vs/platform/broadcast/electron-browser/broadcastService';
+import { ICrashReporterService } from 'vs/workbench/services/crashReporter/electron-browser/crashReporterService';
+import { IBreadcrumbsService } from 'vs/workbench/browser/parts/editor/breadcrumbs';
+import { IProgressService2 } from 'vs/workbench/services/progress/common/progress';
+import { IActivityService } from 'vs/workbench/services/activity/common/activity';
+import { IOutputService } from 'vs/workbench/parts/output/common/output';
+import { IPanelService } from 'vs/workbench/services/panel/common/panelService';
+import { IQuickInputService } from 'vs/platform/quickinput/common/quickInput';
+import { IHeapService } from 'vs/workbench/api/electron-browser/mainThreadHeapService';
 
 export interface IEditorOverrideServices {
 	[index: string]: any;
@@ -145,6 +177,7 @@ export module StaticServices {
 
 	export const logService = define(ILogService, () => new NullLogService());
 
+	// export const textModelService = define(ITextModelService, () => new SimpleEditorModelResolverService())
 }
 
 export class DynamicStandaloneServices extends Disposable {
@@ -165,8 +198,9 @@ export class DynamicStandaloneServices extends Disposable {
 
 		let ensure = <T>(serviceId: ServiceIdentifier<T>, factory: () => T): T => {
 			let value: T = null;
-			if (overrides) {
-				value = overrides[serviceId.toString()];
+			if (overrides && overrides[serviceId.toString()]) {
+				const override = overrides[serviceId.toString()];
+				value = typeof override === 'function' ? override(this._instantiationService) : override;
 			}
 			if (!value) {
 				value = factory();
@@ -188,6 +222,44 @@ export class DynamicStandaloneServices extends Disposable {
 		ensure(IContextMenuService, () => this._register(new ContextMenuService(domElement, telemetryService, notificationService, contextViewService)));
 
 		ensure(IMenuService, () => new SimpleMenuService(commandService));
+
+		// console.log(IRequestService);
+		// ensure(IRequestService, () => null);
+		ensure(IActivityService, () => null);
+		ensure(IOutputService, () => null);
+		ensure(IPanelService, () => null);
+		ensure(IBreadcrumbsService, () => null);
+		ensure(ICrashReporterService, () => null);
+		ensure(ICodeSandboxService, () => null);
+		ensure(IBroadcastService, () => null);
+		ensure(IWorkspacesService, () => null);
+		ensure(ISearchService, () => null);
+		ensure(IEnvironmentService, () => null);
+		ensure(IJSONEditingService, () => null);
+		ensure(IDecorationsService, () => null);
+		ensure(IBackupFileService, () => null);
+		ensure(IFileService, () => null);
+		ensure(IWindowService, () => null);
+		ensure(IExtensionGalleryService, () => null);
+		ensure(IExtensionManagementService, () => null);
+		ensure(IExtensionEnablementService, () => null);
+		ensure(IExtensionService, () => null);
+		ensure(IHashService, () => null);
+		ensure(IUntitledEditorService, () => null);
+		ensure(IEditorGroupsService, () => null);
+		ensure(IStorageService, () => null);
+		ensure(IWindowsService, () => null);
+		ensure(IViewletService, () => null);
+		ensure(ITextFileService, () => null);
+		ensure(ITextModelService, () => null);
+		ensure(IEditorService, () => null);
+		ensure(IPreferencesService, () => null);
+		ensure(IPartService, () => null);
+		ensure(IProgressService2, () => null);
+		ensure(IHistoryService, () => null);
+		ensure(IQuickOpenService, () => null);
+		ensure(IQuickInputService, () => null);
+		ensure(IHeapService, () => null);
 
 		ensure(IBulkEditService, () => new SimpleBulkEditService(StaticServices.modelService.get(IModelService)));
 	}
